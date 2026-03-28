@@ -1,0 +1,289 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+
+}
+
+body {
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #08141c, #ffffff);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+.header {
+  width: 50%;
+  margin: 24px auto 0;
+}
+
+.title {
+  width: 50%;
+  text-align: center;
+  margin: 0 auto;
+  color: #fff;
+  font-size: 36px;
+  font-weight: 800;
+  font-family: 'Poppins', sans-serif;
+}
+
+.search {
+  width: 100%;
+  min-height: 48px;
+  background-color: #fff;
+  color: #000;
+  border-radius: 6px;
+  border: 1px solid #000;
+  box-shadow: 3px 3px 6px rgba(0, 0, 0, 1);
+  padding: 8px 12px;
+  margin: 24px auto 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 200px;
+  height: 32px;
+  color: #000;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0 8px;
+  outline: none;
+}
+
+.search-btn {
+  width: 80px;
+  height: 32px;
+  background-color: #08141c;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+}
+
+.content {
+  width: 50%;
+  min-height: 200px;
+  margin: 20px auto 0;
+  background-color: #fff;
+  border-radius: 8px;
+  border: 2px solid #000;
+  box-shadow: 6px 6px 8px rgba(0, 0, 0, 1);
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.todo-stats {
+  width: 100%;
+  padding: 8px 16px;
+  font-size: 14px;
+  color: #666;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 8px;
+}
+
+.todo-list {
+  width: 100%;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.content li {
+  list-style: none;
+  padding: 16px 20px;
+  font-size: 16px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+  border-radius: 6px;
+  margin: 0 0 8px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.todo-item-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.todo-item-details {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #666;
+  width: 100%;
+}
+
+.priority-tag {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.priority-high {
+  background-color: #ffcccc;
+  color: #cc0000;
+}
+
+.priority-medium {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.priority-low {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.category-tag {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: bold;
+  background-color: #e2e3e5;
+  color: #495057;
+}
+
+.due-date {
+  font-size: 10px;
+  color: #666;
+}
+
+.overdue {
+  color: #cc0000;
+  font-weight: bold;
+}
+
+#checkAll,
+.checkbox {
+  margin-right: 12px;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+}
+
+.delete-btn {
+  width: 30px;
+  height: 30px;
+  background-color: #802020;
+  border-radius: 50%;
+  border: none;
+  color: #fff;
+  outline: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  position: absolute;
+  top: 16px;
+  right: 10px;
+}
+
+.delete-selected-btn {
+  margin-left: 12px;
+  padding: 4px 12px;
+  background-color: #802020;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.edit-input {
+  flex: 1;
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  margin-right: 8px;
+}
+
+.edit-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  margin-right: 4px;
+}
+
+.intro {
+  width: 100%;
+  margin-bottom: 12px;
+  color: #000;
+  font-size: 18px;
+  font-family: 'Poppins', sans-serif;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.intro ul {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.intro li {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 8px 16px;
+  box-shadow: none;
+  border: none;
+}
+
+.filters {
+  width: 50%;
+  margin: 12px auto 0;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-group span {
+  font-size: 14px;
+  color: #fff;
+}
+
+.priority-select,
+.category-select,
+.due-date-input,
+.filter-category,
+.sort-select {
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  outline: none;
+  font-size: 14px;
+}
+
+.intro-top {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}

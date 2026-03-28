@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="todo.css">
+</head>
+
+<body>
+  <div class="header">
+    <div class="title">
+      TO DO LIST
+    </div>
+    <div class="search">
+      <input type="text" placeholder="新增待办事项..." class="search-input">
+      <select class="priority-select">
+        <option value="low">低优先级</option>
+        <option value="medium">中优先级</option>
+        <option value="high">高优先级</option>
+      </select>
+      <select class="category-select">
+        <option value="">无分类</option>
+        <option value="work">工作</option>
+        <option value="life">生活</option>
+        <option value="study">学习</option>
+      </select>
+      <input type="date" class="due-date-input">
+      <button class="search-btn">提交</button>
+    </div>
+  </div>
+  <div class="filters">
+    <div class="filter-group">
+      <span>筛选分类:</span>
+      <select class="filter-category">
+        <option value="">全部</option>
+        <option value="work">工作</option>
+        <option value="life">生活</option>
+        <option value="study">学习</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span>排序:</span>
+      <select class="sort-select">
+        <option value="date">按时间</option>
+        <option value="priority">按优先级</option>
+      </select>
+    </div>
+  </div>
+  <div class="content">
+    <div class="todo-stats">
+      <span class="remaining-count">剩余 <span id="remaining-number">0</span> 项未完成</span>
+    </div>
+    <div class="intro">
+      <ul>
+        <li>
+          <input type="checkbox" id="checkAll">
+          <span>全选</span>
+          <button class="delete-selected-btn">删除选中</button>
+        </li>
+      </ul>
+    </div>
+    <ul class="todo-list"></ul>
+  </div>
+  <script>
+    //获取对象
+    const searchInput = document.querySelector('.search-input');
+    const searchBtn = document.querySelector('.search-btn');
+    const content = document.querySelector('.content');
+    const todoList = document.querySelector('.todo-list');
+    const checkAll = document.querySelector('#checkAll');
+    const prioritySelect = document.querySelector('.priority-select');
+    const categorySelect = document.querySelector('.category-select');
+    const dueDateInput = document.querySelector('.due-date-input');
+    const filterCategory = document.querySelector('.filter-category');
+    const sortSelect = document.querySelector('.sort-select');
+    // 从本地存储加载待办事项
+    function loadTodos() {
+      const todos = JSON.parse(localStorage.getItem('todos') || '[]');
+      renderTodos(todos);
+    }
+    // 保存list到本地存储,只能存字符串
+    function saveTodos() {
+      const todos = [];
+      todoList.querySelectorAll('li').forEach(function (item) {
+        const text = item.querySelector('.todo-text').textContent;
+        const checked = item.querySelector('.checkbox').checked;
+        const priority = item.dataset.priority;
+        const category = item.dataset.category;
+        const dueDate = item.dataset.dueDate;
+        todos.push({ text, checked, priority, category, dueDate });
+      });
+      localStorage.setItem('todos', JSON.stringify(todos));
+    }
+    // 渲染list
+    function renderTodos(todos) {
+      // 清空现有列表
+      todoList.innerHTML = '';
+      // list筛选，创建副本
+      const filteredTodos = todos.filter(function (todo) {
+        if (filterCategory.value === '') return true;
+        return todo.category === filterCategory.value;
+      });
+      // list排序
+      const sortedTodos = [...filteredTodos].sort(function (a, b) {
+        if (sortSelect.value === 'priority') {
+          const priorityOrder = { high: 0, medium: 1, low: 2 };
+          return priorityOrder[b.priority] - priorityOrder[a.priority];
+        } else if (sortSelect.value === 'date') {
+          return new Date(b.dueDate || '9999-12-31') - new Date(a.dueDate || '9999-12-31');
+        }
+        return 0;
+      });
+      // 渲染排序后的list
+      sortedTodos.forEach(function (todo) {
+        addTodoFromStorage(todo);
+      });
+      // 更新全选状态
+      updateCheckAllStatus();
+    }
+    // 从存储中添加list
+    function addTodoFromStorage(todo) {
+      const todoItem = document.createElement('li');
+      todoItem.dataset.priority = todo.priority || 'low';
+      todoItem.dataset.category = todo.category || '';
+      todoItem.dataset.dueDate = todo.dueDate || '';
+
+      // 检查是否逾期 逾期满足1.有截止日期 2.截止日期<当前日期 3.未完成
+      const isOverdue = todo.dueDate && new Date(todo.dueDate) < new Date() && !todo.checked;
+      // 逾期弹出提示
+      if (isOverdue) {
+        alert('DDL到啦!!!');
+      }
+      todoItem.innerHTML = `
+        <div class="todo-item-header">
+          <input type="checkbox" class="checkbox" ${todo.checked ? 'checked' : ''}>
+          <span class="todo-text">${todo.text}</span>
+           <button class="edit-btn"></button>
+          <button class="delete-btn">×</button>
+        </div>
+        <div class="todo-item-details">
+          <span class="priority-tag priority-${todo.priority || 'low'}">
+            ${getPriorityText(todo.priority || 'low')}
+          </span>
+          ${todo.category ? `<span class="category-tag">${getCategoryText(todo.category)}</span>` : ''}
+          ${todo.dueDate ? `<span class="due-date ${isOverdue ? 'overdue' : ''}">截止: ${todo.dueDate}</span>` : ''}
+        </div>
+      `;
+      //添加到todo-list ul元素顶部
+      todoList.prepend(todoItem);
+      //为编辑按钮添加事件监听器
+      todoItem.querySelector('.edit-btn').addEventListener('click', function () {
+        editTodoItem(todoItem);
+      });
+      //为新添加的删除按钮添加事件监听器
+      todoItem.querySelector('.delete-btn').addEventListener('click', function () {
+        todoItem.remove();
+        //更新全选状态
+        updateCheckAllStatus();
+        //更新剩余未完成项数量
+        updateRemainingCount();
+        //保存到本地存储
+        saveTodos();
+      });
+      //为新添加的复选框添加事件监听器
+      todoItem.querySelector('.checkbox').addEventListener('change', function () {
+        updateCheckAllStatus();
+        //更新剩余未完成项数量
+        updateRemainingCount();
+        //保存到本地存储
+        saveTodos();
+      });
+    }
+    // 编辑待办事项
+    function editTodoItem(todoItem) {
+      const textSpan = todoItem.querySelector('.todo-text');
+      const currentText = textSpan.textContent;
+
+      // 创建编辑输入框
+      const editInput = document.createElement('input');
+      editInput.type = 'text';
+      editInput.value = currentText;
+      editInput.className = 'edit-input';
+
+      // 替换文本为输入框
+      textSpan.replaceWith(editInput);
+      editInput.focus();
+
+      // 保存编辑的函数
+      function saveEdit() {
+        const newText = editInput.value.trim();
+        if (newText) {
+          const newSpan = document.createElement('span');
+          newSpan.className = 'todo-text';
+          newSpan.textContent = newText;
+          editInput.replaceWith(newSpan);
+          saveTodos();
+        } else {
+          // 如果输入为空，恢复原来的文本
+          const newSpan = document.createElement('span');
+          newSpan.className = 'todo-text';
+          newSpan.textContent = currentText;
+          editInput.replaceWith(newSpan);
+        }
+      }
+      // 失去焦点或按Enter键时保存
+      editInput.addEventListener('blur', saveEdit);
+      editInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          saveEdit();
+        }
+      });
+    }
+    // 获取优先级文本
+    function getPriorityText(priority) {
+      const priorityMap = { high: '高', medium: '中', low: '低' };
+      return priorityMap[priority] || '低';
+    }
+    // 获取分类文本
+    function getCategoryText(category) {
+      const categoryMap = { work: '工作', life: '生活', study: '学习' };
+      return categoryMap[category] || category;
+    }
+    // 点击全选复选框注册事件
+    checkAll.addEventListener('click', function () {
+      const allCheckboxes = todoList.querySelectorAll('.checkbox');
+      // 遍历小复选框，让小复选框的checked=全选复选框的
+      for (let i = 0; i < allCheckboxes.length; i++) {
+        allCheckboxes[i].checked = checkAll.checked;
+      }
+      //更新剩余未完成项数量
+      updateRemainingCount();
+      //保存到本地存储
+      saveTodos();
+    });
+    // 删除选中功能
+    const deleteSelectedBtn = document.querySelector('.delete-selected-btn');
+    deleteSelectedBtn.addEventListener('click', function () {
+      const checkedItems = todoList.querySelectorAll('.checkbox:checked');
+      checkedItems.forEach(function (checkbox) {
+        checkbox.closest('li').remove();
+      });
+      // 更新全选状态
+      updateCheckAllStatus();
+      // 更新剩余未完成项数量
+      updateRemainingCount();
+      // 保存到本地存储
+      saveTodos();
+    });
+    //更新全选状态函数
+    function updateCheckAllStatus() {
+      const allCheckboxes = todoList.querySelectorAll('.checkbox');
+      const checkedBoxes = todoList.querySelectorAll('.checkbox:checked');
+      checkAll.checked = allCheckboxes.length > 0 && allCheckboxes.length === checkedBoxes.length;
+    }
+    // 更新剩余未完成项数量
+    function updateRemainingCount() {
+      const totalItems = todoList.querySelectorAll('.checkbox').length;
+      const checkedItems = todoList.querySelectorAll('.checkbox:checked').length;
+      const remainingItems = totalItems - checkedItems;
+      document.getElementById('remaining-number').textContent = remainingItems;
+    }
+    //添加list函数
+    function addTodo() {
+      const todoText = searchInput.value.trim();
+      if (todoText) {
+        //创建新的list对象
+        const todo = {
+          text: todoText,
+          checked: false,
+          priority: prioritySelect.value,
+          category: categorySelect.value,
+          dueDate: dueDateInput.value
+        };
+        //添加到todo-list ul元素中
+        addTodoFromStorage(todo);
+        //更新剩余未完成项数量
+        updateRemainingCount();
+        //清空输入框和选择框
+        searchInput.value = '';
+        prioritySelect.value = 'low';
+        categorySelect.value = '';
+        dueDateInput.value = '';
+        //保存到本地存储
+        saveTodos();
+      }
+    }
+    //点击提交按钮添加list项
+    searchBtn.addEventListener('click', addTodo);
+    //按Enter键添加list项
+    searchInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        addTodo();
+      }
+    });
+    // 筛选和排序事件监听器
+    filterCategory.addEventListener('change', function () {
+      const todos = JSON.parse(localStorage.getItem('todos') || '[]');
+      renderTodos(todos);
+    });
+    sortSelect.addEventListener('change', function () {
+      const todos = JSON.parse(localStorage.getItem('todos') || '[]');
+      renderTodos(todos);
+    });
+    //从本地储存加载出来
+    loadTodos();
+    // 更新剩余未完成项数量
+    updateRemainingCount();
+  </script>
+</body>
+
+</html>
